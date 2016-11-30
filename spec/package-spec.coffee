@@ -205,3 +205,22 @@ describe "Package", ->
 
     it "uses the package name defined in package.json", ->
       expect(metadata.name).toBe 'package-with-a-totally-different-name'
+
+  describe "the initialize() hook", ->
+
+    it "gets called when the package is initialized", ->
+      packagePath = atom.project.getDirectories()[0].resolve('packages/package-with-deserializers')
+      pack = buildPackage(packagePath)
+      spyOn(pack, 'initialize')
+      expect(pack.initialize).not.toHaveBeenCalled()
+      pack.activate()
+      expect(pack.initialize).toHaveBeenCalled()
+
+    it "gets called when a deserializer is used", ->
+      packagePath = atom.project.getDirectories()[0].resolve('packages/package-with-deserializers')
+      pack = buildPackage(packagePath)
+      spyOn(pack, 'initialize')
+      pack.load()
+      expect(pack.initialize).not.toHaveBeenCalled()
+      atom.deserializers.deserialize({deserializer: 'Deserializer1', a: 'b'})
+      expect(pack.initialize).toHaveBeenCalled()
